@@ -1,11 +1,12 @@
 #!/bin/bash
 
-pipeline=./pipeline
-reqrep=./reqrep
-pair=./pair
-pubsub=./pubsub
-survey=./survey
-bus=./bus
+src_base=../src
+pipeline=$src_base/pipeline
+reqrep=$src_base/reqrep
+pair=$src_base/pair
+pubsub=$src_base/pubsub
+survey=$src_base/survey
+bus=$src_base/bus
 sep='------------------------------'
 
 pipline_test() {
@@ -86,4 +87,3 @@ pair_test $*
 pubsub_test $*
 survey_test $*
 bus_test $*
-
