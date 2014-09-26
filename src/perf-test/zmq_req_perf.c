@@ -32,16 +32,16 @@ static void client_task(void *args, zctx_t *ctx, void *pipe)
     }
     free(buf);
 
+    char *resp = zstr_recv(client);
+    assert(strcmp(resp, "well") == 0);
+    free(resp);
+
     get_timestamp(&end_ts);
     if (perf_type == THROUGHPUT) {
         cal_thr(msg_size, msg_count, end_ts - start_ts);
     } else if (perf_type == LATENCY) {
         cal_latency(msg_size, msg_count, end_ts - start_ts);
     }
-
-    char *resp = zstr_recv(client);
-    assert(strcmp(resp, "well") == 0);
-    free(resp);
 
     zstr_send(pipe, "done");
 }

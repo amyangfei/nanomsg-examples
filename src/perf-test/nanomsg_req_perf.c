@@ -37,17 +37,17 @@ static void client_task(void *args, zctx_t *ctx, void *pipe)
         }
     }
 
+    buf = (char *) malloc(msg_size);
+    nn_recv(client_fd, buf, msg_size, 0);
+    assert(strcmp(buf, "well") == 0);
+    free(buf);
+
     get_timestamp(&end_ts);
     if (perf_type == THROUGHPUT) {
         cal_thr(msg_size, msg_count, end_ts - start_ts);
     } else if (perf_type == LATENCY) {
         cal_latency(msg_size, msg_count, end_ts - start_ts);
     }
-
-    buf = (char *) malloc(msg_size);
-    nn_recv(client_fd, buf, msg_size, 0);
-    assert(strcmp(buf, "well") == 0);
-    free(buf);
 
     zstr_send(pipe, "done");
 }
