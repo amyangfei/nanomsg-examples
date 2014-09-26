@@ -20,22 +20,22 @@ all: $(PIPELINE_NAME) $(REQREP_NAME) $(PAIR_NAME) $(PUBSUB_NAME) $(SURVEY_NAME) 
 .PHONY: all
 
 $(PIPELINE_NAME): $(PIPELINE_OBJ)
-	$(CC) -o $@ $^ $(FINAL_LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(FINAL_LIBS)
 
 $(REQREP_NAME): $(REQREP_OBJ)
-	$(CC) -o $@ $^ $(FINAL_LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(FINAL_LIBS)
 
 $(PAIR_NAME): $(PAIR_OBJ)
-	$(CC) -o $@ $^ $(FINAL_LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(FINAL_LIBS)
 
 $(PUBSUB_NAME): $(PUBSUB_OBJ)
-	$(CC) -o $@ $^ $(FINAL_LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(FINAL_LIBS)
 
 $(SURVEY_NAME): $(SURVEY_OBJ)
-	$(CC) -o $@ $^ $(FINAL_LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(FINAL_LIBS)
 
 $(BUS_NAME): $(BUS_OBJ)
-	$(CC) -o $@ $^ $(FINAL_LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(FINAL_LIBS)
 
 test:
 	@(cd ../../tests; ./runtest)
