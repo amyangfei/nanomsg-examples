@@ -38,7 +38,7 @@ $(BUS_NAME): $(BUS_OBJ)
 	$(CC) -o $@ $^ $(FINAL_LIBS)
 
 test:
-	@(cd ../tests; ./runtest)
+	@(cd ../../tests; ./runtest)
 
 clean:
 	rm *.o

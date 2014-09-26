@@ -1,5 +1,5 @@
 default: all
 
 .DEFAULT:
-	cd src && $(MAKE) $@
+	cd src/sp-test && $(MAKE) $@
 

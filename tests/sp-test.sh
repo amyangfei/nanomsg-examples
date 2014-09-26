@@ -1,6 +1,6 @@
 #!/bin/bash
 
-src_base=../src
+src_base=../src/sp-test
 pipeline=$src_base/pipeline
 reqrep=$src_base/reqrep
 pair=$src_base/pair
