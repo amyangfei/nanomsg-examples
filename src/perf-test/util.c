@@ -19,6 +19,7 @@ void cal_thr(size_t msg_sz, int msg_cnt, INT64 time_cost)
 
     printf("message size: %d [B]\n", (int) msg_sz);
     printf("message count: %d\n", (int) msg_cnt);
+    printf("time cost: %lu ms\n", time_cost);
     printf("throughput: %d [msg/s]\n", (int) thr);
     printf("throughput: %.3f [Mb/s]\n", mbs);
 }
