@@ -15,7 +15,8 @@ static void client_task(void *args, zctx_t *ctx, void *pipe)
     int msg_count = info->msg_count;
     int perf_type = info->perf_type;
     char *buf = (char *) malloc(msg_size);
-    memset(buf, 'a', msg_size);
+    memset(buf, 'a', msg_size-1);
+    buf[msg_size] = '\0';
 
     int client_fd = nn_socket(AF_SP, NN_PAIR);
     assert(client_fd != -1);
@@ -37,8 +38,8 @@ static void client_task(void *args, zctx_t *ctx, void *pipe)
         }
     }
 
-    buf = (char *) malloc(msg_size);
-    nn_recv(client_fd, buf, msg_size, 0);
+    buf = (char *) malloc(64);
+    nn_recv(client_fd, buf, 64, 0);
     assert(strcmp(buf, "well") == 0);
     free(buf);
 
@@ -130,7 +131,7 @@ int main(int argc, char *argv[])
 
     thr_info *info = (thr_info *) malloc(sizeof(thr_info));
     info->bind_to = bind;
-    info->msg_size = msg_size;
+    info->msg_size = msg_size + 1;
     info->msg_count = msg_count;
     info->perf_type = perf_type;
 
