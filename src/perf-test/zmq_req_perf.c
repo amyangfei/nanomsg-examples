@@ -85,7 +85,7 @@ void usage()
     fprintf(stderr, "  -b <bind_addr>   \tbind point(eg. tcp://127.0.0.1:12345).\n");
     fprintf(stderr, "  -s <msg_size>    \tmessage size in byte\n");
     fprintf(stderr, "  -c <msg_count>   \tmessage count\n");
-    fprintf(stderr, "  -t <test_type>   \ttest type, throughput or latency\n");
+    fprintf(stderr, "  -t <test_type>   \ttest type: 0 for throughput, 1 for latency\n");
     fprintf(stderr, "  -h               \tOutput this help and exit.\n");
 }
 

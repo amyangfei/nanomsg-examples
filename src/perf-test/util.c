@@ -15,7 +15,7 @@ void get_timestamp(INT64 *assigned_timestamp)
 void cal_thr(size_t msg_sz, int msg_cnt, INT64 time_cost)
 {
     uint64_t thr = (uint64_t) ((double) msg_cnt / time_cost * 1000);
-    double mbs = (double) (thr * msg_sz) / 1024 / 1024;
+    double mbs = (double) (thr * msg_sz * 8) / 1000 / 1000;
 
     printf("message size: %d [B]\n", (int) msg_sz);
     printf("message count: %d\n", (int) msg_cnt);
@@ -28,6 +28,7 @@ void cal_latency(size_t msg_sz, int msg_cnt, INT64 time_cost)
 {
     double latency = (double) time_cost / (msg_cnt * 2);
     printf("message size: %d [B]\n", (int) msg_sz);
+    printf("time cost: %lu ms\n", time_cost);
     printf("roundtrip count: %d\n", (int) msg_cnt);
     printf("average latency: %.3f [ms]\n", (double) latency);
 }

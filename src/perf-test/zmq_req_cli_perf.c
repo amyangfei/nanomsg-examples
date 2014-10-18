@@ -10,6 +10,7 @@ static void client_task(void *args, zctx_t *ctx, void *pipe)
     const char *connect = info->bind_to;
     size_t msg_size = info->msg_size;
     int msg_count = info->msg_count;
+    int test_type = info->perf_type;
     char *buf = (char *) malloc(msg_size+1);
     memset(buf, 'a', msg_size);
     buf[msg_size] = '\0';
@@ -23,14 +24,20 @@ static void client_task(void *args, zctx_t *ctx, void *pipe)
     for (i = 0; i < msg_count; i++) {
         int sent = zstr_send(client, buf);
         assert(sent == 0);
-        char *recv_msg = zstr_recv(client);
-        assert(strlen(recv_msg) == msg_size);
-        free(recv_msg);
+        if (test_type == LATENCY) {
+            char *recv_msg = zstr_recv(client);
+            assert(strlen(recv_msg) == msg_size);
+            free(recv_msg);
+        }
     }
     free(buf);
 
     get_timestamp(&end_ts);
-    cal_thr(msg_size, msg_count, end_ts - start_ts);
+    if (test_type == THROUGHPUT) {
+        cal_thr(msg_size, msg_count, end_ts - start_ts);
+    } else if (test_type == LATENCY) {
+        cal_latency(msg_size, msg_count, end_ts - start_ts);
+    }
 
     zstr_send(pipe, "done");
 }
@@ -41,6 +48,7 @@ void usage()
     fprintf(stderr, "  -b <conn_addr>   \tconnect point(eg. tcp://127.0.0.1:12345).\n");
     fprintf(stderr, "  -s <msg_size>    \tmessage size in byte\n");
     fprintf(stderr, "  -c <msg_count>   \tmessage count\n");
+    fprintf(stderr, "  -t <test_type>   \ttest type: 0 for throughput, 1 for latency\n");
     fprintf(stderr, "  -h               \tOutput this help and exit.\n");
 }
 
@@ -52,7 +60,7 @@ int main(int argc, char *argv[])
     int perf_type = THROUGHPUT; // not used
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:s:c:h")) != -1) {
+    while ((opt = getopt(argc, argv, "b:s:c:t:h")) != -1) {
         switch (opt) {
         case 'b':
             free(conn_to);
@@ -63,6 +71,9 @@ int main(int argc, char *argv[])
             break;
         case 'c':
             msg_count = atoi(optarg);
+            break;
+        case 't':
+            perf_type = atoi(optarg);
             break;
         case 'h':
             usage();

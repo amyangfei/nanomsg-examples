@@ -13,6 +13,7 @@ static void client_task(void *args, zctx_t *ctx, void *pipe)
     const char *connect = info->bind_to;
     size_t msg_size = info->msg_size;
     int msg_count = info->msg_count;
+    int perf_type = info->perf_type;
     char *buf = (char *) malloc(msg_size);
     memset(buf, 'a', msg_size-1);
     buf[msg_size] = '\0';
@@ -32,12 +33,19 @@ static void client_task(void *args, zctx_t *ctx, void *pipe)
         int nbytes = nn_send(client_fd, buf, msg_size, 0);
         assert(nbytes == (int)msg_size);
 
-        nbytes = nn_recv(client_fd, buf, msg_size, 0);
-        assert(nbytes == (int)msg_size);
+        if (perf_type == LATENCY) {
+            nbytes = nn_recv(client_fd, buf, msg_size, 0);
+            assert(nbytes == (int)msg_size);
+        }
     }
 
     get_timestamp(&end_ts);
-    cal_thr(msg_size - 1, msg_count, end_ts - start_ts);
+
+    if (perf_type == THROUGHPUT) {
+        cal_thr(msg_size - 1, msg_count, end_ts - start_ts);
+    } else if (perf_type == LATENCY) {
+        cal_latency(msg_size - 1, msg_count, end_ts - start_ts);
+    }
 
     zstr_send(pipe, "done");
 }
@@ -60,7 +68,7 @@ int main(int argc, char *argv[])
     int perf_type = THROUGHPUT;
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:s:c:h")) != -1) {
+    while ((opt = getopt(argc, argv, "b:s:c:t:h")) != -1) {
         switch (opt) {
         case 'b':
             free(conn_to);
@@ -71,6 +79,9 @@ int main(int argc, char *argv[])
             break;
         case 'c':
             msg_count = atoi(optarg);
+            break;
+        case 't':
+            perf_type = atoi(optarg);
             break;
         case 'h':
             usage();

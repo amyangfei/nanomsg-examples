@@ -6,6 +6,7 @@
 #include "nanomsg/pair.h"
 #include "nanomsg/tcp.h"
 #include "czmq.h"
+#include "util.h"
 
 #define INIT_MSG_SIZE   1024
 
@@ -19,7 +20,7 @@ void server_stop(int signum)
     }
 }
 
-static void *server_task(char *bind_to)
+void *server_task(char *bind_to, int test_type)
 {
     int srv_fd = nn_socket(AF_SP, NN_PAIR);
     assert(srv_fd != -1);
@@ -36,8 +37,10 @@ static void *server_task(char *bind_to)
         nbytes = nn_recv(srv_fd, buf, last_size, 0);
         assert(nbytes > 0);
         last_size = nbytes;
-        nbytes = nn_send(srv_fd, buf, last_size, 0);
-        assert(nbytes == (int)last_size);
+        if (test_type == LATENCY) {
+            nbytes = nn_send(srv_fd, buf, last_size, 0);
+            assert(nbytes == (int)last_size);
+        }
         free(buf);
     }
 
@@ -48,19 +51,24 @@ void usage()
 {
     fprintf(stderr, "Usage: ./nanomsg_req_srv_perf [OPTIONS]\n");
     fprintf(stderr, "  -b <bind_addr>   \tbind point(eg. tcp://127.0.0.1:12345).\n");
+    fprintf(stderr, "  -t <test_type>   \ttest type: 0 for throughput, 1 for latency\n");
     fprintf(stderr, "  -h               \tOutput this help and exit.\n");
 }
 
 int main(int argc, char *argv[])
 {
     char *bind = strdup("tcp://127.0.0.1:12345");
+    int perf_type = THROUGHPUT;
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:h")) != -1) {
+    while ((opt = getopt(argc, argv, "b:t:h")) != -1) {
         switch (opt) {
         case 'b':
             free(bind);
             bind = strdup(optarg);
+            break;
+        case 't':
+            perf_type = atoi(optarg);
             break;
         case 'h':
             usage();
@@ -73,7 +81,7 @@ int main(int argc, char *argv[])
 
     signal(SIGTERM, server_stop);
 
-    server_task(bind);
+    server_task(bind, perf_type);
 
     return 0;
 }
