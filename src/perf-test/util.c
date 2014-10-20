@@ -1,6 +1,10 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 #include "util.h"
 
@@ -32,3 +36,46 @@ void cal_latency(size_t msg_sz, int msg_cnt, INT64 time_cost)
     printf("roundtrip count: %d\n", (int) msg_cnt);
     printf("average latency: %.3f [ms]\n", (double) latency);
 }
+
+/*
+ * code comes from http://stackoverflow.com/a/4586990/1115857
+ */
+int get_cpu_count() {
+    long nprocs = -1;
+    long nprocs_max = -1;
+#ifdef _SC_NPROCESSORS_ONLN
+    nprocs = sysconf(_SC_NPROCESSORS_ONLN);
+    if (nprocs < 1) {
+        fprintf(stderr, "Could not determine number of CPUs online:\n%s\n",
+                strerror (errno));
+        return -1;
+    }
+    nprocs_max = sysconf(_SC_NPROCESSORS_CONF);
+    if (nprocs_max < 1) {
+        fprintf(stderr, "Could not determine number of CPUs configured:\n%s\n",
+                strerror (errno));
+        return -1;
+    }
+    /*printf ("%ld of %ld processors online\n",nprocs, nprocs_max);*/
+    return nprocs;
+#else
+    fprintf(stderr, "Could not determine number of CPUs");
+    return -1;
+#endif
+}
+
+static int comp_int(const void * elem1, const void * elem2)
+{
+    int f = *((int*)elem1);
+    int s = *((int*)elem2);
+    if (f > s) return  1;
+    if (f < s) return -1;
+    return 0;
+}
+
+int get_median(int *stats, int len)
+{
+    qsort(stats, len, sizeof(*stats), comp_int);
+    return stats[len / 2];
+}
+

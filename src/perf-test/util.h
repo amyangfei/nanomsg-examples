@@ -9,6 +9,9 @@
 #define THROUGHPUT  0
 #define LATENCY     1
 
+#define SIZE4       4
+#define SIZE8       8
+
 typedef struct thr_info {
     char *bind_to;
     size_t msg_size;
@@ -16,8 +19,22 @@ typedef struct thr_info {
     int perf_type;
 } thr_info;
 
+typedef struct pubsub_info {
+    char *broker_ip;
+    int recv_port;
+    int send_port;
+
+    int msg_size;
+    int num_channels;
+    char **channels;
+
+    int verbose;
+} pubsub_info;
+
 void get_timestamp(INT64 *assigned_timestamp);
 void cal_thr(size_t msg_sz, int msg_cnt, INT64 time_cost);
 void cal_latency(size_t msg_sz, int msg_cnt, INT64 time_cost);
+int get_cpu_count();
+int get_median(int *stats, int len);
 
 #endif
