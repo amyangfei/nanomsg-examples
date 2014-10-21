@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <signal.h>
+#include <assert.h>
+#include <getopt.h>
 
 #include "nanomsg/nn.h"
 #include "nanomsg/pair.h"
 #include "nanomsg/tcp.h"
-#include "czmq.h"
 #include "util.h"
 
 #define INIT_MSG_SIZE   1024

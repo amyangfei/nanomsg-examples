@@ -11,6 +11,10 @@
 
 #define SIZE4       4
 #define SIZE8       8
+#define SIZE16      16
+#define SIZE32      32
+#define SIZE64      64
+#define SIZE1024    1024
 
 typedef struct thr_info {
     char *bind_to;
