@@ -130,7 +130,9 @@ void usage()
     fprintf(stderr, "  -b <broker_ip>       \tbroker ip(default 127.0.0.1)\n");
     fprintf(stderr, "  -r <receiver_port>   \treceiver port(default 5562)\n");
     fprintf(stderr, "  -s <sender_port>     \tsender port(default 5561)\n");
-    fprintf(stderr, "  -s <run_seconds>     \tclient run time in seconds(default 10s)\n");
+    fprintf(stderr, "  -t <run_seconds>     \tclient run time in seconds(default 10s)\n");
+    fprintf(stderr, "  -S <message_size>    \tmessage in byte(default 20byte)\n");
+    fprintf(stderr, "  -C <client_num>      \tnumber of pub/sub clients(default 1/2 cpu count)\n");
     fprintf(stderr, "  -v                   \tverbose mode\n");
     fprintf(stderr, "  -h                   \tOutput this help and exit.\n");
 }
@@ -150,7 +152,7 @@ int main(int argc, char *argv[])
     int verbose = 0;
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:r:s:c:t:vh")) != -1) {
+    while ((opt = getopt(argc, argv, "b:r:s:t:S:C:vh")) != -1) {
         switch (opt) {
         case 'b':
             free(broker_ip);
@@ -162,11 +164,14 @@ int main(int argc, char *argv[])
         case 's':
             send_port = atoi(optarg);
             break;
-        case 'c':
-            num_clients = atoi(optarg);
-            break;
         case 't':
             run_seconds = atoi(optarg);
+            break;
+        case 'S':
+            msg_size = atoi(optarg);
+            break;
+        case 'C':
+            num_clients = atoi(optarg);
             break;
         case 'v':
             verbose = 1;
