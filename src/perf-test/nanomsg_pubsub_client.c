@@ -1,6 +1,8 @@
 #include <pthread.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
@@ -10,6 +12,45 @@
 #include "nanomsg/pipeline.h"
 #include "nanomsg/pubsub.h"
 #include "nanomsg/tcp.h"
+
+
+char *zsys_vprintf (const char *format, va_list argptr)
+{
+    int size = 256;
+    char *string = (char *) malloc (size);
+    //  Using argptr is destructive, so we take a copy each time we need it
+    //  We define va_copy for Windows in czmq_prelude.h
+    va_list my_argptr;
+    va_copy (my_argptr, argptr);
+    int required = vsnprintf (string, size, format, my_argptr);
+    va_end (my_argptr);
+
+    //  If formatted string cannot fit into small string, reallocate a
+    //  larger buffer for it.
+    if (required >= size) {
+        size = required + 1;
+        free (string);
+        string = (char *) malloc (size);
+        if (string) {
+            va_copy (my_argptr, argptr);
+            vsnprintf (string, size, format, my_argptr);
+            va_end (my_argptr);
+        }
+    }
+    return string;
+}
+
+static void nn_sendf(int dst_fd, const char *format, ...)
+{
+    va_list argptr;
+    va_start (argptr, format);
+    char *string = zsys_vprintf (format, argptr);
+    va_end (argptr);
+
+    nn_send(dst_fd, string, strlen(string) + 1, 0);
+
+    free(string);
+}
 
 void *publisher(void *args)
 {
@@ -35,20 +76,16 @@ void *publisher(void *args)
     assert(rc == 0);
     rc = nn_connect(pub_fd, pub_addr);
 
-    char *msg = (char *) malloc(msg_size + SIZE8);
     char *msg_cont = (char *) malloc(msg_size + 1);
     memset(msg_cont, 'x', msg_size);
     msg_cont[msg_size] = '\0';
 
     while (1) {
         int channel = rand() % num_channels;
-        int len = sprintf(msg, "%s %s", channels[channel], msg_cont);
-        msg[len] = '\0';
-        nn_send(pub_fd, msg, len + 1, 0);
+        nn_sendf(pub_fd, "%s %s", channels[channel], msg_cont);
     }
 
     free(msg_cont);
-    free(msg);
 
     return NULL;
 }
