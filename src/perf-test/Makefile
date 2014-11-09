@@ -22,7 +22,7 @@ all: dirs $(BUILD_PATH)/zmq_req_perf $(BUILD_PATH)/nanomsg_req_perf \
 $(BUILD_PATH)/zmq_req_perf: $(BUILD_PATH)/zmq_req_perf.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lzmq -lczmq
 
-$(BUILD_PATH)/nanomsg_req_perf: $(BUILD_PATH)/nanomsg_req_perf.o util.o
+$(BUILD_PATH)/nanomsg_req_perf: $(BUILD_PATH)/nanomsg_req_perf.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lnanomsg -lczmq
 
 $(BUILD_PATH)/zmq_req_srv_perf: $(BUILD_PATH)/zmq_req_srv_perf.o
