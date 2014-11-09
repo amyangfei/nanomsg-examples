@@ -8,3 +8,4 @@ reqrep
 survey
 nanomsg_req_perf
 zmq_req_perf
+build

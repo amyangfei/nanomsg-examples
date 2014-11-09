@@ -1,4 +1,4 @@
-BUILD_PATH = .
+BUILD_PATH = build
 SRC_PATH = .
 SRC_EXT = c
 INCLUDES = -I $(SRC_PATH)/
@@ -12,41 +12,41 @@ debug: CFLAGS += $(DCOMPILE_FLAGS)
 SOURCES = $(shell find $(SRC_PATH)/ -name '*.$(SRC_EXT)')
 OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 
-all: zmq_req_perf nanomsg_req_perf \
-	zmq_req_srv_perf zmq_req_cli_perf \
-	nanomsg_req_srv_perf nanomsg_req_cli_perf \
-	zmq_pubsub_broker zmq_pubsub_client \
-	nanomsg_pubsub_broker nanomsg_pubsub_client
+all: dirs $(BUILD_PATH)/zmq_req_perf $(BUILD_PATH)/nanomsg_req_perf \
+	$(BUILD_PATH)/zmq_req_srv_perf $(BUILD_PATH)/zmq_req_cli_perf \
+	$(BUILD_PATH)/nanomsg_req_srv_perf $(BUILD_PATH)/nanomsg_req_cli_perf \
+	$(BUILD_PATH)/zmq_pubsub_broker $(BUILD_PATH)/zmq_pubsub_client \
+	$(BUILD_PATH)/nanomsg_pubsub_broker $(BUILD_PATH)/nanomsg_pubsub_client
 .PHONY: all
 
-zmq_req_perf: zmq_req_perf.o util.o
+$(BUILD_PATH)/zmq_req_perf: $(BUILD_PATH)/zmq_req_perf.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lzmq -lczmq
 
-nanomsg_req_perf: nanomsg_req_perf.o util.o
+$(BUILD_PATH)/nanomsg_req_perf: $(BUILD_PATH)/nanomsg_req_perf.o util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lnanomsg -lczmq
 
-zmq_req_srv_perf: zmq_req_srv_perf.o
+$(BUILD_PATH)/zmq_req_srv_perf: $(BUILD_PATH)/zmq_req_srv_perf.o
 	$(CC) $(CFLAGS) -o $@ $^ -lzmq -lczmq
 
-zmq_req_cli_perf: zmq_req_cli_perf.o util.o
+$(BUILD_PATH)/zmq_req_cli_perf: $(BUILD_PATH)/zmq_req_cli_perf.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lzmq -lczmq
 
-nanomsg_req_srv_perf: nanomsg_req_srv_perf.o
+$(BUILD_PATH)/nanomsg_req_srv_perf: $(BUILD_PATH)/nanomsg_req_srv_perf.o
 	$(CC) $(CFLAGS) -o $@ $^ -lnanomsg
 
-nanomsg_req_cli_perf: nanomsg_req_cli_perf.o util.o
+$(BUILD_PATH)/nanomsg_req_cli_perf: $(BUILD_PATH)/nanomsg_req_cli_perf.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lnanomsg -lczmq
 
-zmq_pubsub_broker: zmq_pubsub_broker.o util.o
+$(BUILD_PATH)/zmq_pubsub_broker: $(BUILD_PATH)/zmq_pubsub_broker.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lpthread -lczmq
 
-zmq_pubsub_client: zmq_pubsub_client.o util.o
+$(BUILD_PATH)/zmq_pubsub_client: $(BUILD_PATH)/zmq_pubsub_client.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lpthread -lczmq
 
-nanomsg_pubsub_broker: nanomsg_pubsub_broker.o util.o
+$(BUILD_PATH)/nanomsg_pubsub_broker: $(BUILD_PATH)/nanomsg_pubsub_broker.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lnanomsg
 
-nanomsg_pubsub_client: nanomsg_pubsub_client.o util.o
+$(BUILD_PATH)/nanomsg_pubsub_client: $(BUILD_PATH)/nanomsg_pubsub_client.o $(BUILD_PATH)/util.o
 	$(CC) $(CFLAGS) -o $@ $^ -lnanomsg
 
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
@@ -54,22 +54,21 @@ $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	$(CC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 
 .PHONY: release
-release: $(OBJECTS)
+release: dirs $(OBJECTS)
 	@echo "Beginning release build"
 	@$(MAKE) all --no-print-directory
 
 .PHONY: debug
-debug: $(OBJECTS)
+debug: dirs $(OBJECTS)
 	@echo "Beginning debug build"
 	@$(MAKE) all --no-print-directory
 
+.PHONY: dirs
+dirs:
+	@echo "Creating directories"
+	@mkdir -p $(dir $(OBJECTS))
+
 clean:
-	rm -rf *.o
-	rm -rf *.d
-	rm -rf zmq_req_perf nanomsg_req_perf \
-		zmq_req_srv_perf zmq_req_cli_perf \
-		nanomsg_req_srv_perf nanomsg_req_cli_perf \
-		zmq_pubsub_broker zmq_pubsub_client \
-		nanomsg_pubsub_broker nanomsg_pubsub_client
+	rm -rf build
 .PHONY: clean
 
