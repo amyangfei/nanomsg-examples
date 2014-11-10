@@ -79,13 +79,17 @@ void *publisher(void *args)
     char *msg_cont = (char *) malloc(msg_size + 1);
     memset(msg_cont, 'x', msg_size);
     msg_cont[msg_size] = '\0';
+    char *msg = (char *) malloc(msg_size + SIZE8);
 
     while (1) {
         int channel = rand() % num_channels;
-        nn_sendf(pub_fd, "%s %s", channels[channel], msg_cont);
+        int len = sprintf(msg, "%s %s", channels[channel], msg_cont);
+        msg[len] = '\0';
+        nn_send(pub_fd, msg, len + 1, 0);
     }
 
     free(msg_cont);
+    free(msg);
 
     return NULL;
 }

@@ -22,14 +22,19 @@ void *publisher(void *args)
     void *pub = zsocket_new(ctx, ZMQ_PUSH);
     zsocket_connect(pub, "tcp://%s:%d", ip, port);
 
-    char *msg = (char *) malloc(msg_size + 1);
-    memset(msg, 'x', msg_size);
-    msg[msg_size] = '\0';
+    char *msg_cont = (char *) malloc(msg_size + 1);
+    memset(msg_cont, 'x', msg_size);
+    msg_cont[msg_size] = '\0';
+    char *msg = (char *) malloc(msg_size + SIZE8);
+
     while (1) {
         int channel = rand() % num_channels;
-        zstr_sendf(pub, "%s %s", channels[channel], msg);
+        int len = sprintf(msg, "%s %s", channels[channel], msg_cont);
+        msg[len] = '\0';
+        zstr_send(pub, msg);
     }
 
+    free(msg_cont);
     free(msg);
     zctx_destroy(&ctx);
 
