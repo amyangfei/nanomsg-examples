@@ -21,13 +21,23 @@ runs = {
 colours = {
     "nanomsg_pubsub": "red",
     "zeromq_pubsub": "green",
+    "nanomsg_pubsub_size": "red",
+    "zeromq_pubsub_size": "green",
     # "blue", "violet", "orange"
 }
 
 
 # Groups of runs mapped to each graph.
 plots = {
-    "0MQ-vs-Nanomsg": ["zeromq_pubsub", "nanomsg_pubsub"],
+    "0MQ-vs-Nanomsg-chg-clients": ["zeromq_pubsub", "nanomsg_pubsub"],
+    "0MQ-vs-Nanomsg-chg-msgsize": ["zeromq_pubsub_size", "nanomsg_pubsub_size"],
+}
+plots_size = {
+    "0MQ-vs-Nanomsg-chg-msgsize": ["zeromq_pubsub_size", "nanomsg_pubsub_size"],
+}
+xlabels = {
+    "0MQ-vs-Nanomsg-chg-clients": "Clients Number",
+    "0MQ-vs-Nanomsg-chg-msgsize": "log2(message size)",
 }
 
 
@@ -35,7 +45,7 @@ def run_clients(args):
     """
     Runs the test_client program for 0MQ or Nanomsg, for the range
     from 1 to cpus * 2 as the number of clients, returning the
-    median messsages per second for each.
+    average messsages per second for each.
     """
     results = []
     num_runs = cpu_count() * 2
@@ -55,6 +65,32 @@ def run_clients(args):
     return results
 
 
+def run_clients_dynamic_msg_size(args):
+    """
+    Runs the test_client program for 0MQ or Nanomsg, with cpus/2 clients and
+    message size ranging from 4 bytes to 1024 bytes, returning the average
+    messsages per second for each.
+    """
+    results = []
+    num_clients = cpu_count() / 2
+    msg_size = [2**i for i in xrange(1, 11)]
+    for idx, sz in enumerate(msg_size):
+        bar = ("#" * (idx + 1)).ljust(len(msg_size))
+        sys.stdout.write("\r[%s] %s/%s " % (bar, idx+1, len(msg_size)))
+        sys.stdout.flush()
+
+        run_args = args[:]
+        run_args.extend(["-C%s" % num_clients])
+        run_args.extend(["-S%s" % sz])
+        print run_args
+        out = check_output(run_args, stderr=PIPE)
+
+        results.append(out.split(" ")[0].strip())
+
+    sys.stdout.write("\n")
+    return results
+
+
 def prepare():
     # Store all results in an output directory.
     try:
@@ -65,18 +101,29 @@ def prepare():
 
 def bench():
     prepare()
-    # Store results from each test_client run into files.
+
     for name, args in runs.iteritems():
         with open(output_path(name + ".dat"), "w") as f:
             f.write("\n".join(run_clients(args)))
 
+    for name, args in runs.iteritems():
+        with open(output_path(name + "_size.dat"), "w") as f:
+            f.write("\n".join(run_clients_dynamic_msg_size(args)))
+
 
 def draw():
-    with open("plot.p", "r") as f:
-        plotfile = f.read()
-
     # change working dir to output
     chdir(output_path())
+
+    plot_basic = """set terminal png enhanced font 'Georgia,12' size 960,600
+                    set output "%(name)s.png"
+                    set grid y
+                    set xlabel "%(xlabel)s"
+                    set ylabel "Messages per second, per client"
+                    set decimal locale
+                    set format y "%%'g"
+                    set xrange [1:%(clients)s]
+                    plot %(lines)s"""
 
     line = '"%s.dat" using ($0+1):1 with lines title "%s" lw 2 lt rgb "%s"'
     for name, names in plots.items():
@@ -86,7 +133,9 @@ def draw():
         with open(name + ".p", "w") as f:
             lines = ", ".join([line % (l, l.replace("_", " "), colours[l])
                             for l in names])
-            f.write(plotfile % {"name": name, "lines": lines, "clients": clients})
+            f.write(plot_basic %
+                    {"name": name, "lines": lines,
+                        "clients": clients, "xlabel": xlabels[name]})
         Popen(["gnuplot", name + ".p"], stderr=sys.stdout)
 
 

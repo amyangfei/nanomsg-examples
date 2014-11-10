@@ -76,6 +76,14 @@ static int comp_int(const void * elem1, const void * elem2)
 int get_median(int *stats, int len)
 {
     qsort(stats, len, sizeof(*stats), comp_int);
-    return stats[len / 2];
+    if (len <= 5) {
+        return stats[len / 2];
+    } else {
+        int sum = 0, i;
+        for (i = 2; i < len - 2; i++) {
+            sum += stats[i];
+        }
+        return sum / (len - 4);
+    }
 }
 
