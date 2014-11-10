@@ -6,8 +6,10 @@ WARN = -Wall
 CFLAGS = $(STD) $(WARN)
 DCOMPILE_FLAGS = -g
 COMPILE_FLAGS = -O3
+PFOFILE_FLAGS = -pg -g
 release: CFLAGS += $(COMPILE_FLAGS)
 debug: CFLAGS += $(DCOMPILE_FLAGS)
+profile: CFLAGS += $(PFOFILE_FLAGS)
 
 SOURCES = $(shell find $(SRC_PATH)/ -name '*.$(SRC_EXT)')
 OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
@@ -62,6 +64,9 @@ release: dirs $(OBJECTS)
 debug: dirs $(OBJECTS)
 	@echo "Beginning debug build"
 	@$(MAKE) all --no-print-directory
+
+.PHONY: profile
+profile: dirs $(OBJECTS) all
 
 .PHONY: dirs
 dirs:

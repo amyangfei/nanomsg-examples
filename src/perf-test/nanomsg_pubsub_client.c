@@ -140,7 +140,10 @@ void *subscriber(void *args)
     while (1) {
         char *buf = NULL;
         bytes = nn_recv(sub_fd, &buf, NN_MSG, 0);
-        assert (bytes >= 0);
+        if (bytes < 0) {
+            continue;
+        }
+        /*assert (bytes >= 0);*/
         nn_freemsg (buf);
 
         messages++;
@@ -278,7 +281,10 @@ int main(int argc, char *argv[])
         char *msg = NULL;
 
         int bytes = nn_recv(metrics_fd, &msg, NN_MSG, 0);
-        assert (bytes >= 0);
+        if (bytes < 0) {
+            continue;
+        }
+        /*assert (bytes >= 0);*/
         char *start = strchr(msg, ' ') + 1;
         stats[cnt++] = atoi(start);
 

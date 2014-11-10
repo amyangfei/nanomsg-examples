@@ -35,7 +35,10 @@ void serve(int verbose, int recv_port, int send_port)
     while (1) {
         char *buf = NULL;
         int bytes = nn_recv(recv_fd, &buf, NN_MSG, 0);
-        assert(bytes > 0);
+        if (bytes <= 0) {
+            continue;
+        }
+        /*assert(bytes > 0);*/
 
         bytes = nn_send(send_fd, buf, bytes, 0);
 
