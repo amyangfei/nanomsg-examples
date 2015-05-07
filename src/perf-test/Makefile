@@ -47,7 +47,7 @@ $(BUILD_PATH)/nanomsg_pubsub_broker: $(BUILD_PATH)/nanomsg_pubsub_broker.o $(BUI
 	$(CC) $(CFLAGS) -o $@ $^ -lnanomsg
 
 $(BUILD_PATH)/nanomsg_pubsub_client: $(BUILD_PATH)/nanomsg_pubsub_client.o $(BUILD_PATH)/util.o
-	$(CC) $(CFLAGS) -o $@ $^ -lnanomsg
+	$(CC) $(CFLAGS) -o $@ $^ -lpthread -lnanomsg
 
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	@echo "Compiling: $< -> $@"

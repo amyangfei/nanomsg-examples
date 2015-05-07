@@ -40,18 +40,6 @@ char *zsys_vprintf (const char *format, va_list argptr)
     return string;
 }
 
-static void nn_sendf(int dst_fd, const char *format, ...)
-{
-    va_list argptr;
-    va_start (argptr, format);
-    char *string = zsys_vprintf (format, argptr);
-    va_end (argptr);
-
-    nn_send(dst_fd, string, strlen(string) + 1, 0);
-
-    free(string);
-}
-
 void *publisher(void *args)
 {
     pthread_detach(pthread_self());
